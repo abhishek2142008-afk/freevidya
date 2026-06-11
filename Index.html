@@ -1,9 +1,293 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-<title>FreeVidya</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FreeVidya — Free Education Platform</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0f0f0f;font-family:'Segoe UI',sans-serif;color:#f1f1f1}
+  ::-webkit-scrollbar{width:0}
+  select option{background:#1a1a1a;color:#f1f1f1}
+  textarea{font-family:'Segoe UI',sans-serif}
+  input{font-family:'Segoe UI',sans-serif}
+  button{font-family:'Segoe UI',sans-serif}
+</style>
 </head>
 <body>
-<h1>Coming Soon</h1>
-</body>
-</html>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef} = React;
+
+const C = {
+  root:"#0f0f0f", card:"#1a1a1a", chip:"#272727",
+  border:"#3f3f3f", accent:"#ffffff", red:"#ff0000",
+  text:"#f1f1f1", muted:"#aaaaaa", sub:"#717171",
+};
+
+const SUBJECTS = [
+  {id:"all",label:"Sab",emoji:"🌐"},
+  {id:"math",label:"गणित",emoji:"📐"},
+  {id:"science",label:"विज्ञान",emoji:"🔬"},
+  {id:"history",label:"इतिहास",emoji:"🏛️"},
+  {id:"geography",label:"भूगोल",emoji:"🌍"},
+  {id:"english",label:"English",emoji:"📖"},
+  {id:"competitive",label:"Competitive",emoji:"🎯"},
+  {id:"computer",label:"Computer",emoji:"💻"},
+  {id:"economics",label:"अर्थशास्त्र",emoji:"📊"},
+];
+
+const VIDEOS = [
+  {id:"v1",ytId:"oTB9e5KZozg",title:"Trigonometry Complete - Class 10",subject:"math",channel:"Khan Academy Hindi",views:"12L",duration:"1:08:00",cls:"Class 10"},
+  {id:"v2",ytId:"NybHckSEQBI",title:"Quadratic Equations - Class 10 Full Chapter",subject:"math",channel:"Khan Academy Hindi",views:"8.4L",duration:"52:00",cls:"Class 10"},
+  {id:"v3",ytId:"sLQDBMkc-iE",title:"Statistics Class 10 - Mean Median Mode",subject:"math",channel:"Khan Academy Hindi",views:"5.2L",duration:"45:00",cls:"Class 10"},
+  {id:"v4",ytId:"FXgV9ySNusc",title:"Introduction to Algebra",subject:"math",channel:"Khan Academy Hindi",views:"3.1L",duration:"10:00",cls:"Class 8"},
+  {id:"v5",ytId:"jMScFkN5zFw",title:"Laws of Motion - Class 11 Physics",subject:"science",channel:"Physics Wallah",views:"22L",duration:"1:30:00",cls:"Class 11"},
+  {id:"v6",ytId:"_kkoBRBPVcA",title:"Work Energy Power - Class 11",subject:"science",channel:"Physics Wallah",views:"15L",duration:"1:15:00",cls:"Class 11"},
+  {id:"v7",ytId:"P9dpTTpjymE",title:"Human Eye and Colourful World - Class 10",subject:"science",channel:"Physics Wallah",views:"9.3L",duration:"55:00",cls:"Class 10"},
+  {id:"v8",ytId:"iAQPaFGHNR0",title:"Cell - Structure and Functions Class 8",subject:"science",channel:"Khan Academy Hindi",views:"4.5L",duration:"28:00",cls:"Class 8"},
+  {id:"v9",ytId:"CLbNBpHiCBo",title:"Mughal Empire - UPSC History Complete",subject:"history",channel:"Study IQ",views:"18L",duration:"2:10:00",cls:"UPSC"},
+  {id:"v10",ytId:"m6cFdOFhZFE",title:"Indian Freedom Struggle 1857-1947",subject:"history",channel:"Study IQ",views:"11L",duration:"1:45:00",cls:"Class 10"},
+  {id:"v11",ytId:"UDlE5oVCdFE",title:"Ancient History of India - Harappan",subject:"history",channel:"Study IQ",views:"7.8L",duration:"58:00",cls:"UPSC"},
+  {id:"v12",ytId:"YHIeEPMFyBM",title:"Physical Features of India - Class 9",subject:"geography",channel:"Study IQ",views:"6.2L",duration:"42:00",cls:"Class 9"},
+  {id:"v13",ytId:"2bLAGTLTlKQ",title:"Climate of India - Complete Chapter",subject:"geography",channel:"Study IQ",views:"4.9L",duration:"38:00",cls:"Class 9"},
+  {id:"v14",ytId:"stlGxGBFGiE",title:"SSC CGL 2024 - Complete Strategy",subject:"competitive",channel:"Unacademy",views:"25L",duration:"1:20:00",cls:"SSC"},
+  {id:"v15",ytId:"RI2pvF0LCxI",title:"UPSC Prelims Strategy 2024",subject:"competitive",channel:"Study IQ",views:"30L",duration:"1:05:00",cls:"UPSC"},
+  {id:"v16",ytId:"Sj7F3e9oYyI",title:"NEET 2024 - Biology Complete Revision",subject:"competitive",channel:"Physics Wallah",views:"18L",duration:"2:00:00",cls:"NEET"},
+  {id:"v17",ytId:"zOjov-2OZl0",title:"Python Tutorial Hindi - Beginners",subject:"computer",channel:"CodeWithHarry",views:"45L",duration:"1:55:00",cls:"College"},
+  {id:"v18",ytId:"HXV3zeQKqGY",title:"SQL Full Course Hindi",subject:"computer",channel:"CodeWithHarry",views:"28L",duration:"4:20:00",cls:"College"},
+  {id:"v19",ytId:"w1FzUTEOEgE",title:"English Grammar Complete - Hindi Medium",subject:"english",channel:"Unacademy",views:"12L",duration:"1:10:00",cls:"Class 10"},
+  {id:"v20",ytId:"DkBbcJkQVck",title:"Spoken English Course - Hindi se English",subject:"english",channel:"Unacademy",views:"20L",duration:"1:30:00",cls:"College"},
+  {id:"v21",ytId:"d_avmxNAF0I",title:"Indian Economy - UPSC Complete",subject:"economics",channel:"Study IQ",views:"9.5L",duration:"1:25:00",cls:"UPSC"},
+  {id:"v22",ytId:"3ez10ADR_gM",title:"Microeconomics Class 12 - Full Chapter",subject:"economics",channel:"Khan Academy Hindi",views:"5.1L",duration:"48:00",cls:"Class 12"},
+];
+
+const SHORTS = [
+  {id:"s1",ytId:"oTB9e5KZozg",title:"Trigonometry trick — 60 sec!",subject:"math",channel:"Khan Academy Hindi",views:"5.2L"},
+  {id:"s2",ytId:"jMScFkN5zFw",title:"Newton Laws in 90 seconds",subject:"science",channel:"Physics Wallah",views:"8.1L"},
+  {id:"s3",ytId:"CLbNBpHiCBo",title:"Mughal Empire trick 🧠",subject:"history",channel:"Study IQ",views:"4.3L"},
+  {id:"s4",ytId:"zOjov-2OZl0",title:"Python in 2 min — beginners",subject:"computer",channel:"CodeWithHarry",views:"9.9L"},
+  {id:"s5",ytId:"stlGxGBFGiE",title:"SSC CGL shortcut reasoning",subject:"competitive",channel:"Unacademy",views:"6.7L"},
+];
+
+const CHANNELS = [
+  {id:"ch1",name:"Physics Wallah",subject:"science",subs:"2.1Cr",emoji:"🔬"},
+  {id:"ch2",name:"Khan Academy Hindi",subject:"math",subs:"1.3Cr",emoji:"📐"},
+  {id:"ch3",name:"Study IQ",subject:"history",subs:"1.5Cr",emoji:"🏛️"},
+  {id:"ch4",name:"Unacademy",subject:"competitive",subs:"3.2Cr",emoji:"🎯"},
+  {id:"ch5",name:"CodeWithHarry",subject:"computer",subs:"1.8Cr",emoji:"💻"},
+];
+
+const SUB_COLORS = {math:"#1d4ed8",science:"#15803d",history:"#b45309",geography:"#0e7490",english:"#7c3aed",competitive:"#dc2626",computer:"#db2777",economics:"#0f766e"};
+
+function getEmoji(subject){ return SUBJECTS.find(s=>s.id===subject)?.emoji||"📚"; }
+function getColor(subject){ return SUB_COLORS[subject]||"#272727"; }
+
+// Icons
+const IHome = ()=><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>;
+const IShorts = ()=><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.77 10.32l-1.2-.5L18 9.06c1.84-.96 2.53-3.23 1.56-5.06s-3.23-2.53-5.06-1.56L6 6.94c-1.29.68-2.07 2.04-2 3.49.07 1.4.93 2.67 2.22 3.25l1.2.5L6 14.94c-1.84.96-2.53 3.23-1.56 5.06A3.987 3.987 0 0 0 8 22c.67 0 1.35-.17 1.97-.51L18 17.06c1.29-.68 2.07-2.04 2-3.49-.07-1.4-.93-2.67-2.23-3.25zM10 14.45v-4.9l4 2.45-4 2.45z"/></svg>;
+const IPlus = ()=><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>;
+const ISub = ()=><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18v-2h2v2h-2zm-4 0v-2h2v2H6zm8 0v-2h2v2h-2zM3 9V7h18v2H3zm3-4V3h12v2H6z"/></svg>;
+const IUser = ()=><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>;
+const IBell = ()=><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>;
+const ISearch = ()=><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>;
+const IBack = ()=><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>;
+const IBookmark = ()=><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg>;
+
+function Thumb({ytId,title,subject,duration,watched}){
+  const [err,setErr]=useState(false);
+  return(
+    <div style={{position:"relative",paddingTop:"52%",borderRadius:10,overflow:"hidden",background:getColor(subject)}}>
+      {!err
+        ?<img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt={title}
+            style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",objectFit:"cover"}}
+            onError={()=>setErr(true)}/>
+        :<div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8,padding:12}}>
+            <span style={{fontSize:40}}>{getEmoji(subject)}</span>
+            <span style={{color:"rgba(255,255,255,0.9)",fontSize:13,fontWeight:600,textAlign:"center",lineHeight:1.3}}>{title}</span>
+          </div>
+      }
+      <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(0,0,0,0.5) 0%,transparent 50%)"}}/>
+      <span style={{position:"absolute",bottom:8,right:8,background:"rgba(0,0,0,0.85)",color:"#fff",fontSize:12,padding:"2px 7px",borderRadius:4,fontWeight:600}}>{duration}</span>
+      {watched&&<span style={{position:"absolute",top:8,left:8,background:"#16a34a",color:"#fff",fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:10}}>✓ Dekha</span>}
+    </div>
+  );
+}
+
+function SmallThumb({ytId,subject,duration,watched}){
+  const [err,setErr]=useState(false);
+  return(
+    <div style={{position:"relative",width:130,flexShrink:0,borderRadius:8,overflow:"hidden",background:getColor(subject),aspectRatio:"16/9",display:"flex",alignItems:"center",justifyContent:"center"}}>
+      {!err
+        ?<img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt="" style={{width:"100%",height:"100%",objectFit:"cover",display:"block",position:"absolute",inset:0}} onError={()=>setErr(true)}/>
+        :<span style={{fontSize:28}}>{getEmoji(subject)}</span>
+      }
+      <span style={{position:"absolute",bottom:4,right:4,background:"rgba(0,0,0,0.85)",color:"#fff",fontSize:10,padding:"1px 5px",borderRadius:3,fontWeight:600}}>{duration}</span>
+      {watched&&<span style={{position:"absolute",top:4,left:4,background:"#16a34a",color:"#fff",fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:8}}>✓</span>}
+    </div>
+  );
+}
+
+function NavBar({tab,setTab}){
+  const items=[
+    {id:"home",icon:<IHome/>,label:"Home"},
+    {id:"shorts",icon:<IShorts/>,label:"Shorts"},
+    {id:"upload",icon:<IPlus/>,label:""},
+    {id:"subscriptions",icon:<ISub/>,label:"Subscriptions"},
+    {id:"profile",icon:<IUser/>,label:"Profile"},
+  ];
+  return(
+    <div style={{position:"fixed",bottom:0,left:0,right:0,background:C.root,borderTop:`1px solid ${C.border}`,display:"flex",zIndex:100,maxWidth:480,margin:"0 auto"}}>
+      {items.map(item=>(
+        <button key={item.id} onClick={()=>setTab(item.id)}
+          style={{flex:1,background:"none",border:"none",cursor:"pointer",padding:item.id==="upload"?"8px 0":"10px 0 8px",display:"flex",flexDirection:"column",alignItems:"center",gap:3,color:tab===item.id?"#fff":C.sub,fontFamily:"inherit",position:"relative"}}>
+          {item.id==="upload"
+            ?<div style={{width:40,height:40,borderRadius:8,background:C.chip,display:"flex",alignItems:"center",justifyContent:"center",border:`1px solid ${C.border}`}}><IPlus/></div>
+            :item.icon
+          }
+          {item.label&&<span style={{fontSize:10,fontWeight:tab===item.id?700:400}}>{item.label}</span>}
+          {tab===item.id&&item.id!=="upload"&&<div style={{position:"absolute",top:0,left:"25%",right:"25%",height:2,background:"#fff",borderRadius:2}}/>}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function App(){
+  const [tab,setTab]=useState("home");
+  const [subject,setSubject]=useState("all");
+  const [search,setSearch]=useState("");
+  const [searchMode,setSearchMode]=useState(false);
+  const [video,setVideo]=useState(null);
+  const [saved,setSaved]=useState([]);
+  const [watched,setWatched]=useState([]);
+  const [subscribed,setSubscribed]=useState([]);
+  const [notes,setNotes]=useState("");
+  const [minutes,setMinutes]=useState(42);
+  const [streak]=useState(7);
+  const [shortIdx,setShortIdx]=useState(0);
+  const [focusMode,setFocusMode]=useState(false);
+  const [studyTimer,setStudyTimer]=useState(0);
+  const [timerRunning,setTimerRunning]=useState(false);
+  const [uploadForm,setUploadForm]=useState({title:"",link:"",subject:"",level:"",lang:"Hindi",desc:""});
+  const [submitted,setSubmitted]=useState(false);
+  const searchRef=useRef(null);
+  const timerRef=useRef(null);
+  const studyTimerRef=useRef(null);
+
+  useEffect(()=>{
+    if(tab==="player") timerRef.current=setInterval(()=>setMinutes(m=>m+1),60000);
+    return()=>clearInterval(timerRef.current);
+  },[tab]);
+
+  useEffect(()=>{
+    if(searchMode && searchRef.current) searchRef.current.focus();
+  },[searchMode]);
+
+  useEffect(()=>{
+    if(timerRunning) studyTimerRef.current=setInterval(()=>setStudyTimer(t=>t+1),1000);
+    else clearInterval(studyTimerRef.current);
+    return()=>clearInterval(studyTimerRef.current);
+  },[timerRunning]);
+
+  const formatTimer=(secs)=>{
+    const m=Math.floor(secs/60).toString().padStart(2,"0");
+    const s=(secs%60).toString().padStart(2,"0");
+    return `${m}:${s}`;
+  };
+
+  const openVideo=(v)=>{
+    setVideo(v); setNotes(""); setFocusMode(false); setTimerRunning(false); setStudyTimer(0);
+    if(!watched.includes(v.id)) setWatched(p=>[...p,v.id]);
+    setTab("player"); setSearchMode(false);
+  };
+  const toggleSave=id=>setSaved(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
+  const toggleSub=id=>setSubscribed(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
+
+  const filtered=VIDEOS.filter(v=>{
+    const bySub=subject==="all"||v.subject===subject;
+    const byQ=!search||v.title.toLowerCase().includes(search.toLowerCase())||v.channel.toLowerCase().includes(search.toLowerCase());
+    return bySub&&byQ;
+  });
+
+  const doUpload=()=>{
+    if(!uploadForm.title||!uploadForm.link||!uploadForm.subject) return;
+    setSubmitted(true);
+    setTimeout(()=>{setSubmitted(false);setUploadForm({title:"",link:"",subject:"",level:"",lang:"Hindi",desc:""});},3000);
+  };
+
+  const rs={
+    root:{background:C.root,minHeight:"100vh",maxWidth:480,margin:"0 auto",display:"flex",flexDirection:"column"},
+    topbar:{background:C.root,borderBottom:`1px solid ${C.border}`,padding:"10px 14px",display:"flex",alignItems:"center",gap:8,position:"sticky",top:0,zIndex:50},
+    logo:{display:"flex",alignItems:"center",gap:2},
+    iconBtn:{background:"none",border:"none",cursor:"pointer",color:C.text,display:"flex",alignItems:"center",padding:6},
+    secLabel:{fontSize:13,fontWeight:700,color:C.muted,textTransform:"uppercase",letterSpacing:0.5,margin:"16px 0 10px"},
+    card:{background:C.card,borderRadius:12,overflow:"hidden"},
+    bluePill:{background:"rgba(255,255,255,0.1)",color:C.text,fontSize:12,fontWeight:600,padding:"3px 9px",borderRadius:20,display:"inline-block"},
+    greyPill:{background:C.chip,color:C.muted,fontSize:12,fontWeight:500,padding:"3px 9px",borderRadius:20,display:"inline-flex",alignItems:"center",gap:4},
+    divider:{height:1,background:C.border,margin:"14px 0"},
+    field:{background:C.chip,border:`1px solid ${C.border}`,borderRadius:10,padding:"11px 13px",fontSize:15,fontFamily:"inherit",color:C.text,outline:"none",width:"100%",boxSizing:"border-box"},
+    primaryBtn:{background:C.accent,border:"none",borderRadius:12,color:"#000",padding:"15px",fontSize:16,fontWeight:700,cursor:"pointer",fontFamily:"inherit",width:"100%"},
+  };
+
+  // SEARCH OVERLAY
+  if(searchMode) return(
+    <div style={rs.root}>
+      <div style={rs.topbar}>
+        <button style={rs.iconBtn} onClick={()=>setSearchMode(false)}><IBack/></button>
+        <input ref={searchRef} style={{flex:1,background:C.chip,border:"none",borderRadius:20,padding:"8px 14px",fontSize:15,fontFamily:"inherit",color:C.text,outline:`1.5px solid ${C.accent}`}} placeholder="Search karo..." value={search} onChange={e=>setSearch(e.target.value)} onKeyDown={e=>e.key==="Escape"&&setSearchMode(false)}/>
+        {search&&<button style={{...rs.iconBtn,fontSize:18,color:C.muted}} onClick={()=>setSearch("")}>✕</button>}
+      </div>
+      <div style={{padding:"0 16px 80px",overflowY:"auto",flex:1}}>
+        <p style={rs.secLabel}>Trending Searches</p>
+        <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+          {["Trigonometry","Newton Laws","Mughal Empire","SSC Reasoning","Python","NEET Biology","Algebra"].map(t=>(
+            <button key={t} style={{background:C.chip,border:`1px solid ${C.border}`,borderRadius:20,padding:"7px 14px",color:C.muted,fontSize:13,cursor:"pointer",fontFamily:"inherit"}} onClick={()=>{setSearch(t);setSearchMode(false);}}>🔍 {t}</button>
+          ))}
+        </div>
+        <p style={rs.secLabel}>Subjects</p>
+        <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+          {SUBJECTS.filter(s=>s.id!=="all").map(s=>(
+            <button key={s.id} style={{background:C.chip,border:`1px solid ${C.border}`,borderRadius:20,padding:"7px 14px",color:C.muted,fontSize:13,cursor:"pointer",fontFamily:"inherit"}} onClick={()=>{setSubject(s.id);setSearch("");setSearchMode(false);}}>
+              {s.emoji} {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // PLAYER
+  if(tab==="player"&&video) return(
+    <div style={rs.root}>
+      <div style={rs.topbar}>
+        <button style={rs.iconBtn} onClick={()=>setTab("home")}><IBack/></button>
+        <span style={{flex:1,color:C.text,fontSize:14,fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginLeft:4}}>{video.title}</span>
+        <button style={{...rs.iconBtn,color:saved.includes(video.id)?"#fff":C.sub}} onClick={()=>toggleSave(video.id)}><IBookmark/></button>
+      </div>
+      <div style={{overflowY:"auto",flex:1,paddingBottom:20}}>
+        <div style={{position:"relative",paddingTop:"56.25%",background:"#000"}}>
+          <iframe style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",border:"none"}}
+            src={`https://www.youtube.com/embed/${video.ytId}?rel=0&modestbranding=1&showinfo=0&iv_load_policy=3`}
+            allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"
+            allowFullScreen title={video.title}/>
+        </div>
+        {focusMode&&(
+          <div style={{background:"#0a2a0a",padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:`1px solid #1a4a1a`}}>
+            <span style={{color:"#4ade80",fontSize:13,fontWeight:700}}>🎯 Focus Mode ON</span>
+            <button style={{background:"none",border:`1px solid ${C.border}`,borderRadius:20,color:C.muted,padding:"4px 12px",fontSize:12,cursor:"pointer",fontFamily:"inherit"}} onClick={()=>setFocusMode(false)}>Off</button>
+          </div>
+        )}
+        <div style={{padding:"14px 14px 0"}}>
+          <span style={rs.bluePill}>{video.cls}</span>
+          <h2 style={{color:C.text,fontSize:16,fontWeight:700,lineHeight:1.4,margin:"10px 0 4px"}}>{video.title}</h2>
+          <p style={{color:C.muted,fontSize:13,marginBottom:14}}>📺 {video.channel} &nbsp;·&nbsp; ⏱ {video.duration} &nbsp;·&nbsp; 👁 {video.views}</p>
+          {(()=>{
+            const ch=CHANNELS.find(c=>c.name===video.channel);
+            if(!ch) return null;
+            const isSub=subscribed.includes(ch.id);
+            return(
+              <div style={{...rs.card,display:"flex",alignItems:"center",gap:12,padding:"12px 14p
